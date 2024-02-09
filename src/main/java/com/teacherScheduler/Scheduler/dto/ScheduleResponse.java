@@ -5,21 +5,22 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
 @Data
-@AllArgsConstructor
 @Builder
+@AllArgsConstructor
 @NoArgsConstructor
-public class ScheduleRequest {
-    private String className;
+public class ScheduleResponse {
+    private Integer Id;
     private String generation;
-    private String department;
+    private String class_name;
     private String start_date;
     private String end_date;
-    private List<Integer> teacherId;
-    private Integer studentNumber;
+    private String department;
+    private List<String> schedule;
 }

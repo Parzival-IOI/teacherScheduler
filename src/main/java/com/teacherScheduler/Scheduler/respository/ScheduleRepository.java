@@ -1,8 +1,7 @@
 package com.teacherScheduler.Scheduler.respository;
 
-import com.teacherScheduler.Scheduler.model.Teacher;
+import com.teacherScheduler.Scheduler.model.Schedule;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
-public @interface ScheduleRepository {
-
+public interface ScheduleRepository extends MongoRepository<Schedule, String> {
 }
