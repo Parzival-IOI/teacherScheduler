@@ -16,7 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ScheduleResponse {
-    private Integer Id;
+    private String id;
     private String generation;
     private String class_name;
     private String start_date;

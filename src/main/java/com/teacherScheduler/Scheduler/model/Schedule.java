@@ -20,7 +20,7 @@ import java.util.List;
 
 public class Schedule {
     @Id
-    private Integer id;
+    private String id;
     private String generation;
     @Field(name="Name")
     private String class_name;
