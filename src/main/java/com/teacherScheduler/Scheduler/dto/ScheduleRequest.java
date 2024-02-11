@@ -1,5 +1,7 @@
 package com.teacherScheduler.Scheduler.dto;
 
+import com.teacherScheduler.Scheduler.Generator.Course;
+import com.teacherScheduler.Scheduler.Generator.Teacher;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,11 +17,8 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 public class ScheduleRequest {
-    private String className;
     private String generation;
     private String department;
-    private String start_date;
-    private String end_date;
-    private List<Integer> teacherId;
-    private Integer studentNumber;
+    private List<Course> courses;
+    private List<Teacher> teachers;
 }

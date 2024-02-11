@@ -1,5 +1,6 @@
 package com.teacherScheduler.Scheduler.services;
 
+import com.teacherScheduler.Scheduler.Generator.Schedule_Generator;
 import com.teacherScheduler.Scheduler.dto.ScheduleRequest;
 import com.teacherScheduler.Scheduler.dto.ScheduleResponse;
 import com.teacherScheduler.Scheduler.model.Schedule;
@@ -20,12 +21,9 @@ public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
     public void createSchedule(ScheduleRequest scheduleRequest) {
 
-        List<String> e = new ArrayList<>();
-        e.add("Hi");
 
-        Schedule schedule = new Schedule("2", "5", "E1", "e", "2022-01-02", "2022-04-02", e);
-        scheduleRepository.save(schedule);
-        log.info("Saved {}", schedule.getId());
+        Schedule_Generator.generateSchedule(scheduleRequest.getCourses(), scheduleRequest.getTeachers(), scheduleRequest.getGeneration(), scheduleRequest.getDepartment());
+
     }
 
     public List<ScheduleResponse> getAllSchedules() {
@@ -39,9 +37,6 @@ public class ScheduleService {
                 .class_name(schedule.getClass_name())
                 .department(schedule.getDepartment())
                 .generation(schedule.getGeneration())
-                .end_date(schedule.getEnd_date())
-                .start_date(schedule.getStart_date())
-                .schedule(schedule.getSchedule())
                 .build();
     }
 
@@ -55,9 +50,6 @@ public class ScheduleService {
             foundSchedule.orElse(null).setClass_name(schedule.getClass_name());
             foundSchedule.orElse(null).setGeneration(schedule.getGeneration());
             foundSchedule.orElse(null).setDepartment(schedule.getDepartment());
-            foundSchedule.orElse(null).setEnd_date(schedule.getEnd_date());
-            foundSchedule.orElse(null).setStart_date(schedule.getStart_date());
-            foundSchedule.orElse(null).setSchedule(schedule.getSchedule());
             scheduleRepository.save(foundSchedule.orElse(null));
             return true;
         }

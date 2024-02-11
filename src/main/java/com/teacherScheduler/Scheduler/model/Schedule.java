@@ -8,10 +8,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.List;
-
 @Document(value = "Schedule")
 @AllArgsConstructor
 @NoArgsConstructor
@@ -22,10 +18,15 @@ public class Schedule {
     @Id
     private String id;
     private String generation;
+    private String department;
+
     @Field(name="Name")
     private String class_name;
-    private String department;
-    private String start_date;
-    private String end_date;
-    private List<String> schedule;
+
+    private String part_of_day;
+    private String day;
+    private Integer period;
+    private String course;
+    private String teacher_id;
+    private String teacher_name;
 }
