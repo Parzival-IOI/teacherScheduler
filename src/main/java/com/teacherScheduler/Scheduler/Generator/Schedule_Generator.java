@@ -1,7 +1,6 @@
 package com.teacherScheduler.Scheduler.Generator;
 
 import com.teacherScheduler.Scheduler.model.Schedule;
-import com.teacherScheduler.Scheduler.respository.ScheduleRepository;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -12,7 +11,6 @@ import java.util.Random;
 
 @Slf4j
 public class Schedule_Generator {
-    private static ScheduleRepository scheduleRepository;
 
     // Get random index from list
     private static <T> T getRandomElement(List<T> list) {
@@ -127,7 +125,20 @@ public class Schedule_Generator {
     }
 
     // Generate schedule
-    public static void generateSchedule(List<Course> courses, List<Teacher> allTeachers, String Generation, String Department) {
+    public static List<List<DataContainer>> generateSchedule(List<Course> courses, List<Teacher> allTeachers) {
+
+        for(Course s : courses) {
+            log.info(s.getCourseName());
+        }
+        for(Teacher s : allTeachers) {
+            log.info("===============================");
+            log.info(s.getId());
+            log.info(s.getName());
+            log.info(s.isMorning()? "1" : "0");
+            log.info(s.isAfternoon()? "1" : "0");
+            log.info(s.isEvening()? "1" : "0");
+        }
+
 
         // Divide teacher base on availability
         Map<String, List<Teacher>> teacherAvailability = divideTeacherOnAvailability(allTeachers);
@@ -148,8 +159,8 @@ public class Schedule_Generator {
                 Schedule_Generator.assignCourse(schoolClasses, courses, teachers, availability);
             }
             catch (IllegalArgumentException e) {
-                System.out.println("Number of teachers in " + availability + " is only " + teachers.size() + ". You need at least 5 teacher to make valid assignment of class");
-                return;
+                log.info("Number of teachers in " + availability + " is only " + teachers.size() + ". You need at least 5 teacher to make valid assignment of class");
+                return null;
             }
 
             String[] days = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"};
@@ -160,6 +171,7 @@ public class Schedule_Generator {
 
             for (String day : days) {
                 for (int period : periods) {
+                    log.info("Stop");
 
                     // Initialize new period
                     SessionPeriod sessionPeriod = new SessionPeriod();
@@ -218,20 +230,21 @@ public class Schedule_Generator {
                 schedule.setTeacher_name(r.teacher_name);
                 schedule.setTeacher_id(r.teacher_id);
                 schedule.setDay(r.day);
-                schedule.setGeneration(Generation);
-                schedule.setDepartment(Department);
 
-                scheduleRepository.save(schedule);
-                log.info(schedule.getClass_name());
-                System.out.println();
-                System.out.print("class Name: " + r.class_name);
-                System.out.print(", Course: " + r.course);
-                System.out.print(", period: " + r.period);
-                System.out.print(", Part of day: " + r.part_of_day);
-                System.out.print(", teacher Name: " + r.teacher_name);
-                System.out.print(", teacher ID: " + r.teacher_id);
-                System.out.print(", day: " + r.day);
+//                scheduleRepository.save(schedule);
+
+//                log.info(schedule.getClass_name());
+                log.info("=========================");
+                log.info("class Name: " + r.class_name);
+                log.info(", Course: " + r.course);
+                log.info(", period: " + r.period);
+                log.info(", Part of day: " + r.part_of_day);
+                log.info(", teacher Name: " + r.teacher_name);
+                log.info(", teacher ID: " + r.teacher_id);
+                log.info(", day: " + r.day);
             }
         }
+
+        return test;
     }
 }

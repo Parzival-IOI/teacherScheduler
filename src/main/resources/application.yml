@@ -3,3 +3,6 @@ spring :
     mongodb :
       uri : mongodb+srv://Parzival:QMf8ETKJRwN2niB8@test1.kbux8fe.mongodb.net/?retryWrites=true&w=majority
       database : Schedule
+
+http:
+  csrf(AbstractHttpConfigurer::disable);:

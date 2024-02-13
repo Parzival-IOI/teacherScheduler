@@ -3,6 +3,7 @@ package com.teacherScheduler.Scheduler.Generator;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,7 +16,9 @@ import java.util.Map;
 public class Teacher {
     private String id;
     private final String Name;
+    @Getter
     private final List<Course> Teaching_Course;
+    @Getter
     private int numberOfTeachingClass;
     private final Map<SchoolClass, Integer> teachingSession;
 
@@ -23,7 +26,7 @@ public class Teacher {
     private final boolean isAfternoon;
     private final boolean isEvening;
 
-    public Teacher(String id, String name, boolean isMorning, boolean isAfternoon, boolean isEvening, Course... teaching_Course) {
+    public Teacher(String id, String name, boolean isMorning, boolean isAfternoon, boolean isEvening, List<Course> teaching_Course) {
         this.id = id;
         this.Name = name;
         //Availability = availability;
@@ -52,12 +55,6 @@ public class Teacher {
         }
     }
 
-    public List<Course> getTeaching_Course() {
-        return Teaching_Course;
-    }
-    public int getNumberOfTeachingClass() {
-        return numberOfTeachingClass;
-    }
     public void reduceNumberOfTeachingClass() {
         this.numberOfTeachingClass--;
     }

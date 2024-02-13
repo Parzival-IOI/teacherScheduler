@@ -19,6 +19,6 @@ import java.util.List;
 public class ScheduleRequest {
     private String generation;
     private String department;
-    private List<Course> courses;
-    private List<Teacher> teachers;
+    private List<String> courses;
+    private List<TeacherDTO> teachers;
 }
