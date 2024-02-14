@@ -17,12 +17,10 @@ import org.springframework.data.mongodb.core.mapping.Field;
 public class Schedule {
     @Id
     private String id;
-    private String generation;
-    private String department;
-
     @Field(name="Name")
     private String class_name;
-
+    private String generation;
+    private String department;
     private String part_of_day;
     private String day;
     private Integer period;

@@ -17,10 +17,13 @@ import java.util.List;
 @NoArgsConstructor
 public class ScheduleResponse {
     private String id;
-    private String generation;
     private String class_name;
-    private String start_date;
-    private String end_date;
+    private String generation;
     private String department;
-    private List<String> schedule;
+    private String part_of_day;
+    private String day;
+    private Integer period;
+    private String course;
+    private String teacher_id;
+    private String teacher_name;
 }

@@ -19,7 +19,12 @@ public class Schedule_Generator {
         }
 
         Random random = new Random();
-        return list.get(random.nextInt(list.size()));
+
+        int rand = random.nextInt(list.size());
+
+        log.info(Integer.toString(rand));
+
+        return list.get(rand);
     }
 
     // For each class, assign teacher to courses
@@ -138,12 +143,10 @@ public class Schedule_Generator {
             log.info(s.isAfternoon()? "1" : "0");
             log.info(s.isEvening()? "1" : "0");
         }
-
+        log.info("Generate Started");
 
         // Divide teacher base on availability
         Map<String, List<Teacher>> teacherAvailability = divideTeacherOnAvailability(allTeachers);
-
-        List<ScheduleGenerate> schedules = new ArrayList<>();
 
         List<List<DataContainer>> test = new ArrayList<>();
 
@@ -154,6 +157,7 @@ public class Schedule_Generator {
 
             // Generate class base on teacher
             List<SchoolClass> schoolClasses = generateClasses(teachers.size(), availability.substring(0, 1), courses);
+            log.info("looping through the validate teacher");
 
             try {
                 Schedule_Generator.assignCourse(schoolClasses, courses, teachers, availability);
@@ -163,15 +167,17 @@ public class Schedule_Generator {
                 return null;
             }
 
+
             String[] days = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"};
             Integer[] periods = {1, 2};
 
             // Initialize new schedule
             ScheduleGenerate schedule = new ScheduleGenerate(availability);
+            log.info("Start looping through days");
 
             for (String day : days) {
                 for (int period : periods) {
-                    log.info("Stop");
+                    log.info("Start looping periods");
 
                     // Initialize new period
                     SessionPeriod sessionPeriod = new SessionPeriod();
@@ -184,17 +190,20 @@ public class Schedule_Generator {
 
                     // For each class
                     for (SchoolClass schoolClass : schoolClasses) {
+                        log.info("Start looping Class");
 
                         Teacher teacher = getRandomElement(schoolClass.getAllTeachers());
 
                         // If teacher not available
                         while (!availableTeachers.contains(teacher)) {
                             teacher = getRandomElement(schoolClass.getAllTeachers());
+                            log.info("Start looping to get random 1");
                         }
 
                         // If he/she have already teaches that class 2 session
                         while (teacher.getClassTeachingSession(schoolClass) <= 0) {
                             teacher = getRandomElement(schoolClass.getAllTeachers());
+                            log.info("Start looping to get random 2");
                         }
 
                         // What course he/she teach
@@ -215,7 +224,8 @@ public class Schedule_Generator {
                     schedule.addSchedulePeriod(day, sessionPeriod);
                 }
             }
-            schedules.add(schedule);
+            log.info("end loop through days");
+//            schedules.add(schedule);
             test.add(schedule.gettingSchedule());
         }
 
@@ -234,16 +244,17 @@ public class Schedule_Generator {
 //                scheduleRepository.save(schedule);
 
 //                log.info(schedule.getClass_name());
-                log.info("=========================");
-                log.info("class Name: " + r.class_name);
-                log.info(", Course: " + r.course);
-                log.info(", period: " + r.period);
-                log.info(", Part of day: " + r.part_of_day);
-                log.info(", teacher Name: " + r.teacher_name);
-                log.info(", teacher ID: " + r.teacher_id);
-                log.info(", day: " + r.day);
+//                log.info("=========================");
+//                log.info("class Name: " + r.class_name);
+//                log.info(", Course: " + r.course);
+//                log.info(", period: " + r.period);
+//                log.info(", Part of day: " + r.part_of_day);
+//                log.info(", teacher Name: " + r.teacher_name);
+//                log.info(", teacher ID: " + r.teacher_id);
+//                log.info(", day: " + r.day);
             }
         }
+        log.info("end Generate");
 
         return test;
     }

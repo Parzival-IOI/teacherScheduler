@@ -24,23 +24,16 @@ import java.util.Optional;
 public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
     public void createSchedule(ScheduleRequest scheduleRequest) {
-
-//        log.info(scheduleRequest.getDepartment(), scheduleRequest.getGeneration());
-
         List<Course> courses = new ArrayList<>();
         List<Teacher> teachers = new ArrayList<>();
-
         for(String s : scheduleRequest.getCourses()) {
             courses.add(new Course(s));
-//            log.info(s);
         }
 
         for(TeacherDTO t : scheduleRequest.getTeachers()) {
             List<Course> temp = new ArrayList<>();
             for(String f : t.getTeach()) {
                 temp.add(new Course(f));
-//                log.info(f);
-
             }
             teachers.add(new Teacher(
                     t.getId(),
@@ -50,13 +43,8 @@ public class ScheduleService {
                     (t.getIsEvening() == 1),
                     temp
             ));
-//            log.info(Integer.toString(t.getIsMorning()));
-//            log.info(Integer.toString(t.getIsAfternoon()));
-//            log.info(Integer.toString(t.getIsEvening()));
-
-
         }
-
+        log.info("Service working");
         List<List<DataContainer>> test = Schedule_Generator.generateSchedule(courses, teachers);
         List<Schedule> saveSchedule = new ArrayList<>();
         if(test == null) {
@@ -72,7 +60,7 @@ public class ScheduleService {
                 count++;
             }
         }
-        log.info("over here");
+        log.info("Start Saving data");
 
         scheduleRepository.saveAll(saveSchedule);
     }
@@ -94,10 +82,6 @@ public class ScheduleService {
     public List<ScheduleResponse> getAllSchedules() {
         List<Schedule> schedules = scheduleRepository.findAll();
 
-        Schedule sch = new Schedule("1", "23", "cs", "E1", "Afternoon", "Monday", 1, "C#", "2", "Mick");
-
-        scheduleRepository.save(sch);
-
         return schedules.stream().map(this::mapToScheduleResponse).toList();
     }
 
@@ -107,11 +91,29 @@ public class ScheduleService {
                 .class_name(schedule.getClass_name())
                 .department(schedule.getDepartment())
                 .generation(schedule.getGeneration())
+                .part_of_day(schedule.getPart_of_day())
+                .day(schedule.getDay())
+                .period(schedule.getPeriod())
+                .course(schedule.getCourse())
+                .teacher_id(schedule.getTeacher_id())
+                .teacher_name(schedule.getTeacher_name())
                 .build();
     }
 
-    public Optional<Schedule> getSchedule(String id) {
-        return scheduleRepository.findById(id);
+    public ScheduleResponse getSchedule(String id) {
+        Optional<Schedule> schedule = scheduleRepository.findById(id);
+        return ScheduleResponse.builder()
+                .id(schedule.orElse(null).getId())
+                .class_name(schedule.orElse(null).getClass_name())
+                .department(schedule.orElse(null).getDepartment())
+                .generation(schedule.orElse(null).getGeneration())
+                .part_of_day(schedule.orElse(null).getPart_of_day())
+                .day(schedule.orElse(null).getDay())
+                .period(schedule.orElse(null).getPeriod())
+                .course(schedule.orElse(null).getCourse())
+                .teacher_id(schedule.orElse(null).getTeacher_id())
+                .teacher_name(schedule.orElse(null).getTeacher_name())
+                .build();
     }
 
     public boolean UpdateSchedule(Schedule schedule) {

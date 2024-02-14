@@ -30,8 +30,8 @@ public class ScheduleController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.FOUND)
-    public Optional<Schedule> getSchedule(@PathVariable String id) {
-        return scheduleService.getSchedule(id);
+    public Optional<ScheduleResponse> getSchedule(@PathVariable String id) {
+        return Optional.ofNullable(scheduleService.getSchedule(id));
     }
 
     @PostMapping("/update")
