@@ -1,16 +1,22 @@
 package com.teacherScheduler.Scheduler.Generator;
 
+import com.teacherScheduler.Scheduler.Generator.Course;
+import com.teacherScheduler.Scheduler.Generator.DataContainer;
+import com.teacherScheduler.Scheduler.Generator.ScheduleGenerate;
+import com.teacherScheduler.Scheduler.Generator.SchoolClass;
+import com.teacherScheduler.Scheduler.Generator.Session;
+import com.teacherScheduler.Scheduler.Generator.SessionPeriod;
+import com.teacherScheduler.Scheduler.Generator.Teacher;
 import com.teacherScheduler.Scheduler.model.Schedule;
-import lombok.extern.slf4j.Slf4j;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
-@Slf4j
+
 public class Schedule_Generator {
+
+    //public static void sort() {
+    //
+    //}
 
     // Get random index from list
     private static <T> T getRandomElement(List<T> list) {
@@ -19,12 +25,7 @@ public class Schedule_Generator {
         }
 
         Random random = new Random();
-
-        int rand = random.nextInt(list.size());
-
-        log.info(Integer.toString(rand));
-
-        return list.get(rand);
+        return list.get(random.nextInt(list.size()));
     }
 
     // For each class, assign teacher to courses
@@ -39,11 +40,19 @@ public class Schedule_Generator {
             for (SchoolClass schoolClass : classes) {
 
                 // List of teachers who can teach that course
-                List<Teacher> availableTeachers = course.getTeachers(availability);
+                List<Teacher> courseTeachers = course.getTeachers(availability);
+                List<Teacher> availableTeachers = new ArrayList<>();
+
+                // Retrieve only teacher which can be able to assign to class
+                for (Teacher teacher : courseTeachers) {
+                    if (teachers.contains(teacher)) {
+                        availableTeachers.add(teacher);
+                    }
+                }
 
                 // Pick random teacher
                 Teacher teacher;
-                if (availableTeachers == null || availableTeachers.isEmpty()) {
+                if (availableTeachers.isEmpty()) {
                     teacher = getRandomElement(teachers);
                 }
                 else {
@@ -52,7 +61,7 @@ public class Schedule_Generator {
                 // If teacher already teach 5 class
                 while (teacher.getNumberOfTeachingClass() <= 0) {
 
-                    if (availableTeachers != null) {
+                    if (!availableTeachers.isEmpty()) {
                         availableTeachers.remove(teacher);
                     }
 
@@ -67,7 +76,7 @@ public class Schedule_Generator {
                 // If teacher has been assign to the class yet
                 while (schoolClass.isTheTeacherAssigned(teacher)) {
 
-                    if (availableTeachers != null) {
+                    if (!availableTeachers.isEmpty()) {
                         availableTeachers.remove(teacher);
                     }
 
@@ -118,13 +127,16 @@ public class Schedule_Generator {
     }
 
     // Create morning class, afternoon, evening
-    private static List<SchoolClass> generateClasses(int numberOfTeachers, String classPrefix, List<Course> courses) {
+    private static List<SchoolClass> generateClasses(int numberOfTeachers, String classPrefix, List<Course> courses, int classNumber) {
         // number of class = number of teachers
-
+        if (numberOfTeachers % 5 != 0) {
+            throw new IllegalArgumentException();
+        }
         List<SchoolClass> schoolClasses = new ArrayList<>();
 
         for (int i = 0; i < numberOfTeachers; i++) {
-            schoolClasses.add(new SchoolClass(classPrefix + (i+1) , courses));
+            int classNumberPefix = classNumber + i;
+            schoolClasses.add(new SchoolClass(classPrefix + classNumberPefix, courses));
         }
         return schoolClasses;
     }
@@ -132,101 +144,119 @@ public class Schedule_Generator {
     // Generate schedule
     public static List<List<DataContainer>> generateSchedule(List<Course> courses, List<Teacher> allTeachers) {
 
-        for(Course s : courses) {
-            log.info(s.getCourseName());
-        }
-        for(Teacher s : allTeachers) {
-            log.info("===============================");
-            log.info(s.getId());
-            log.info(s.getName());
-            log.info(s.isMorning()? "1" : "0");
-            log.info(s.isAfternoon()? "1" : "0");
-            log.info(s.isEvening()? "1" : "0");
-        }
-        log.info("Generate Started");
-
         // Divide teacher base on availability
         Map<String, List<Teacher>> teacherAvailability = divideTeacherOnAvailability(allTeachers);
 
+        List<ScheduleGenerate> schedules = new ArrayList<>();
         List<List<DataContainer>> test = new ArrayList<>();
+
 
         for (Map.Entry<String, List<Teacher>> entry : teacherAvailability.entrySet()) {
 
             String availability = entry.getKey();
             List<Teacher> teachers = entry.getValue();
 
-            // Generate class base on teacher
-            List<SchoolClass> schoolClasses = generateClasses(teachers.size(), availability.substring(0, 1), courses);
-            log.info("looping through the validate teacher");
 
-            try {
-                Schedule_Generator.assignCourse(schoolClasses, courses, teachers, availability);
-            }
-            catch (IllegalArgumentException e) {
-                log.info("Number of teachers in " + availability + " is only " + teachers.size() + ". You need at least 5 teacher to make valid assignment of class");
-                return null;
-            }
+            int startIndex = 0;
+            int lastIndex = 5;
+            while (true) {
 
+                // Get list of class 5 at a time
+                List<Teacher> teacherList;
 
-            String[] days = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"};
-            Integer[] periods = {1, 2};
-
-            // Initialize new schedule
-            ScheduleGenerate schedule = new ScheduleGenerate(availability);
-            log.info("Start looping through days");
-
-            for (String day : days) {
-                for (int period : periods) {
-                    log.info("Start looping periods");
-
-                    // Initialize new period
-                    SessionPeriod sessionPeriod = new SessionPeriod();
-
-                    // Create new session
-                    Session session = new Session();
-
-                    // List of all teachers for that time (Morning, Afternoon ...)
-                    List<Teacher> availableTeachers = new ArrayList<>(teachers);
-
-                    // For each class
-                    for (SchoolClass schoolClass : schoolClasses) {
-                        log.info("Start looping Class");
-
-                        Teacher teacher = getRandomElement(schoolClass.getAllTeachers());
-
-                        // If teacher not available
-                        while (!availableTeachers.contains(teacher)) {
-                            teacher = getRandomElement(schoolClass.getAllTeachers());
-                            log.info("Start looping to get random 1");
-                        }
-
-                        // If he/she have already teaches that class 2 session
-                        while (teacher.getClassTeachingSession(schoolClass) <= 0) {
-                            teacher = getRandomElement(schoolClass.getAllTeachers());
-                            log.info("Start looping to get random 2");
-                        }
-
-                        // What course he/she teach
-                        Course course = schoolClass.getCourseByTeacher(teacher);
-
-                        // Create new session and map class to course
-
-                        session.addSession(schoolClass, course);
-
-                        // Teacher is no longer available for this period
-                        availableTeachers.remove(teacher);
-
+                try {
+                    //classes = schoolClasses.subList(startIndex, lastIndex);
+                    teacherList = teachers.subList(startIndex, lastIndex);
+                    System.out.println(availability);
+                    for (Teacher teacher : teacherList) {
+                        System.out.println(teacher.getTeacherName());
                     }
-                    // Add session to period
-                    sessionPeriod.addSessionPeriod(period, session);
-
-                    // Add to schedule
-                    schedule.addSchedulePeriod(day, sessionPeriod);
                 }
+                catch (IndexOutOfBoundsException e) {
+                    //continue;
+                    System.out.println("Invalid number of teachers");
+                    break;
+                }
+
+                List<SchoolClass> schoolClasses;
+
+                // Generate class base on teacher
+                try {
+                    schoolClasses = generateClasses(teacherList.size(), availability.substring(0, 1), courses, startIndex + 1);
+                }
+                catch (IllegalArgumentException e) {
+                    System.out.println("Invalid number of teacher");
+                    return test;
+                }
+
+                try {
+                    Schedule_Generator.assignCourse(schoolClasses, courses, teacherList, availability);
+                }
+                catch (IllegalArgumentException e) {
+                    System.out.println("Invalid number of teacher");
+                    return test;
+                }
+
+                String[] days = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"};
+                Integer[] periods = {1, 2};
+
+                // Initialize new schedule
+                ScheduleGenerate schedule = new ScheduleGenerate(availability);
+
+                for (String day : days) {
+
+                    for (int period : periods) {
+
+                        // Initialize new period
+                        SessionPeriod sessionPeriod = new SessionPeriod();
+
+                        // Create new session
+                        Session session = new Session();
+
+                        // List of all teachers that available for that time
+                        List<Teacher> availableTeachers = new ArrayList<>(teacherList);
+
+                        // For each class
+                        for (SchoolClass schoolClass : schoolClasses) {
+
+                            // Get random teacher from all teachers who teach this particular class
+                            Teacher teacher = getRandomElement(schoolClass.getAllTeachers());
+
+                            // If teacher not available
+                            while (!availableTeachers.contains(teacher)) {
+                                teacher = getRandomElement(schoolClass.getAllTeachers());
+                                System.out.println(teacher.getTeacherName());
+                            }
+
+                            // If he/she have already teaches that class 2 session
+                            while (teacher.getClassTeachingSession(schoolClass) <= 0) {
+                                teacher = getRandomElement(schoolClass.getAllTeachers());
+                                System.out.println("Hello");
+                            }
+
+                            // What course he/she teach
+                            Course course = schoolClass.getCourseByTeacher(teacher);
+
+                            // map class to course
+                            session.addSession(schoolClass, course);
+
+                            // Teacher is no longer available for this period
+                            availableTeachers.remove(teacher);
+
+                        }
+                        // Add session to period
+                        sessionPeriod.addSessionPeriod(period, session);
+                        // Add to schedule
+                        schedule.addSchedulePeriod(day, sessionPeriod);
+                    }
+                    System.out.println("next day");
+                }
+                schedules.add(schedule);
+                test.add(schedule.gettingSchedule());
+                startIndex += 5;
+                lastIndex += 5;
             }
-            log.info("end loop through days");
-//            schedules.add(schedule);
-            test.add(schedule.gettingSchedule());
+            System.out.println("next time of days");
         }
 
         for(List<DataContainer> t : test) {
@@ -240,22 +270,11 @@ public class Schedule_Generator {
                 schedule.setTeacher_name(r.teacher_name);
                 schedule.setTeacher_id(r.teacher_id);
                 schedule.setDay(r.day);
-
-//                scheduleRepository.save(schedule);
-
-//                log.info(schedule.getClass_name());
-//                log.info("=========================");
-//                log.info("class Name: " + r.class_name);
-//                log.info(", Course: " + r.course);
-//                log.info(", period: " + r.period);
-//                log.info(", Part of day: " + r.part_of_day);
-//                log.info(", teacher Name: " + r.teacher_name);
-//                log.info(", teacher ID: " + r.teacher_id);
-//                log.info(", day: " + r.day);
             }
         }
-        log.info("end Generate");
 
         return test;
     }
+
+
 }
