@@ -7,10 +7,14 @@ import com.teacherScheduler.Scheduler.Generator.Teacher;
 import com.teacherScheduler.Scheduler.dto.ScheduleRequest;
 import com.teacherScheduler.Scheduler.dto.ScheduleResponse;
 import com.teacherScheduler.Scheduler.dto.TeacherDTO;
+import com.teacherScheduler.Scheduler.dto.ViewScheduleResponse;
 import com.teacherScheduler.Scheduler.model.Schedule;
 import com.teacherScheduler.Scheduler.respository.ScheduleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -23,6 +27,7 @@ import java.util.Optional;
 @Slf4j
 public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
+    private final MongoTemplate mongoTemplate;
     public void createSchedule(ScheduleRequest scheduleRequest) {
         List<Course> courses = new ArrayList<>();
         List<Teacher> teachers = new ArrayList<>();
@@ -129,6 +134,39 @@ public class ScheduleService {
     }
     public void deleteSchedule(String id) {
         scheduleRepository.deleteById(id);
+    }
+
+    public List<ViewScheduleResponse> viewService(String name, String generation, String department) {
+
+        Query query = new Query()
+                .addCriteria((Criteria.where("Name").is(name)))
+                .addCriteria((Criteria.where("department").is(department)))
+                .addCriteria((Criteria.where("generation").is(generation)));
+
+        List<Schedule> schedules = mongoTemplate.find(query, Schedule.class);
+        List<ViewScheduleResponse> res = new ArrayList<>();
+
+        for(int i=0; i<schedules.size(); i++) {
+            final ViewScheduleResponse sch = getViewScheduleResponse(schedules, i);
+            res.add(sch);
+        }
+
+        return res;
+    }
+
+    private static ViewScheduleResponse getViewScheduleResponse(List<Schedule> schedules, int i) {
+        ViewScheduleResponse sch = new ViewScheduleResponse();
+        sch.setId(schedules.get(i).getId());
+        sch.setGeneration(schedules.get(i).getGeneration());
+        sch.setDepartment(schedules.get(i).getDepartment());
+        sch.setDay(schedules.get(i).getDay());
+        sch.setCourse(schedules.get(i).getCourse());
+        sch.setClass_name(schedules.get(i).getClass_name());
+        sch.setPeriod(schedules.get(i).getPeriod());
+        sch.setPart_of_day(schedules.get(i).getPart_of_day());
+        sch.setTeacher_id(schedules.get(i).getTeacher_id());
+        sch.setTeacher_name(schedules.get(i).getTeacher_name());
+        return sch;
     }
 
 }

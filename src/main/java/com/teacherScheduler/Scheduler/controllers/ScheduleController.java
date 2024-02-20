@@ -1,6 +1,7 @@
 package com.teacherScheduler.Scheduler.controllers;
 import com.teacherScheduler.Scheduler.dto.ScheduleRequest;
 import com.teacherScheduler.Scheduler.dto.ScheduleResponse;
+import com.teacherScheduler.Scheduler.dto.ViewScheduleResponse;
 import com.teacherScheduler.Scheduler.model.Schedule;
 import com.teacherScheduler.Scheduler.services.ScheduleService;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,12 @@ public class ScheduleController {
     @ResponseStatus(HttpStatus.FOUND)
     public Optional<ScheduleResponse> getSchedule(@PathVariable String id) {
         return Optional.ofNullable(scheduleService.getSchedule(id));
+    }
+
+    @GetMapping("/view/{name}/{generation}/{department}")
+    @ResponseStatus(HttpStatus.FOUND)
+    public List<ViewScheduleResponse> viewSchedule(@PathVariable String name, @PathVariable String generation, @PathVariable String department) {
+        return scheduleService.viewService(name, generation, department);
     }
 
     @PostMapping("/update")
