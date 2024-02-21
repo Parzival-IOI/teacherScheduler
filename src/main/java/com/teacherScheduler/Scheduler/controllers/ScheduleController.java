@@ -1,10 +1,12 @@
 package com.teacherScheduler.Scheduler.controllers;
+import com.teacherScheduler.Scheduler.dto.GroupByDTO;
 import com.teacherScheduler.Scheduler.dto.ScheduleRequest;
 import com.teacherScheduler.Scheduler.dto.ScheduleResponse;
 import com.teacherScheduler.Scheduler.dto.ViewScheduleResponse;
 import com.teacherScheduler.Scheduler.model.Schedule;
 import com.teacherScheduler.Scheduler.services.ScheduleService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,7 +27,7 @@ public class ScheduleController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<ScheduleResponse> getSchedules() {
+    public List<GroupByDTO> getSchedules() {
         return scheduleService.getAllSchedules();
     }
 

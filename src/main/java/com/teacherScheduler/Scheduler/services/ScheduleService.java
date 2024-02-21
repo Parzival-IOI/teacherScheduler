@@ -4,6 +4,7 @@ import com.teacherScheduler.Scheduler.Generator.Course;
 import com.teacherScheduler.Scheduler.Generator.DataContainer;
 import com.teacherScheduler.Scheduler.Generator.Schedule_Generator;
 import com.teacherScheduler.Scheduler.Generator.Teacher;
+import com.teacherScheduler.Scheduler.dto.GroupByDTO;
 import com.teacherScheduler.Scheduler.dto.ScheduleRequest;
 import com.teacherScheduler.Scheduler.dto.ScheduleResponse;
 import com.teacherScheduler.Scheduler.dto.TeacherDTO;
@@ -13,6 +14,10 @@ import com.teacherScheduler.Scheduler.respository.ScheduleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.aggregation.GroupOperation;
+import org.springframework.data.mongodb.core.aggregation.TypedAggregation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
@@ -20,6 +25,9 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.group;
+import static org.springframework.data.mongodb.core.aggregation.Aggregation.newAggregation;
 
 
 @Service
@@ -84,10 +92,27 @@ public class ScheduleService {
         return schedule;
     }
 
-    public List<ScheduleResponse> getAllSchedules() {
-        List<Schedule> schedules = scheduleRepository.findAll();
+    public List<GroupByDTO> getAllSchedules() {
+        GroupOperation groupOperation = Aggregation.group("Name", "generation", "department");
 
-        return schedules.stream().map(this::mapToScheduleResponse).toList();
+        TypedAggregation<Schedule> aggregation = Aggregation.newAggregation(Schedule.class, groupOperation);
+
+        List<Schedule> result =  mongoTemplate.aggregate(aggregation, Schedule.class, Schedule.class).getMappedResults();
+
+        List<GroupByDTO> group = new ArrayList<>();
+        for(Schedule s : result) {
+            GroupByDTO g = new GroupByDTO();
+
+            g.setName(s.getId().split(",")[0].split(":")[1].replaceAll("\"", "").replaceAll(" ", ""));
+            g.setGeneration(s.getId().split(",")[1].split(":")[1].replaceAll("\"", "").replaceAll(" ", ""));
+            g.setDepartment(s.getId().split(",")[2].split(":")[1].replaceAll("\"", "").replaceAll(" ", "").replaceAll("}", ""));
+
+
+            log.info(s.getId());
+            group.add(g);
+        }
+
+        return group;
     }
 
     public ScheduleResponse mapToScheduleResponse(Schedule schedule) {
